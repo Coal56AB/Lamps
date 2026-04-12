@@ -26,10 +26,15 @@ void ClockManager_Init(void) {
     }
 }
 
-time_t ClockManager_GetTime(void) {
+time_t ClockManager_GetTime(int blink) {
     HAL_RTC_GetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN);
     currentTime.hour = rtc_time.Hours;
     currentTime.min = rtc_time.Minutes;
+    if(blink)
+    {
+      if(currentTime.sec != rtc_time.Seconds)
+        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    }
     currentTime.sec = rtc_time.Seconds;
     return currentTime;
 }

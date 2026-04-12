@@ -71,7 +71,7 @@ static void FormatTime(char* buf, const time_t* t) {
 static void UpdateDisplay(void) {
     switch (menu.state) {
         case STATE_CLOCK: {
-            time_t now = ClockManager_GetTime();
+            time_t now = ClockManager_GetTime(1);
             char buf[7];
             FormatTime(buf, &now);
             Segment_SetString(buf);
@@ -251,7 +251,7 @@ static void ProcessButton(Button_Type btn, bool longPress) {
                 switch (menu.selectedMenuItem) {
                     case MAIN_MENU_SET_TIME:
                         menu.state = STATE_SET_TIME;
-                        menu.originalTime = ClockManager_GetTime();
+                        menu.originalTime = ClockManager_GetTime(0);
                         menu.editTime = menu.originalTime;
                         menu.editStep = 0;
                         menu.blinkState = true;

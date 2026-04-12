@@ -9,7 +9,7 @@
 void ClockManager_Init(void);
 
 // Получить текущее время из RTC
-time_t ClockManager_GetTime(void);
+time_t ClockManager_GetTime(int blink);
 
 // Установить время в RTC
 void ClockManager_SetTime(uint8_t hour, uint8_t min, uint8_t sec);

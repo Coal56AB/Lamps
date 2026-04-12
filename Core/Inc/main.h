@@ -62,6 +62,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define LED_Pin GPIO_PIN_13
+#define LED_GPIO_Port GPIOC
 #define DIGIT_HOUR_H_Pin GPIO_PIN_0
 #define DIGIT_HOUR_H_GPIO_Port GPIOA
 #define DIGIT_HOUR_L_Pin GPIO_PIN_1
