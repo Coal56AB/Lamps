@@ -797,6 +797,16 @@
               <FileType>5</FileType>
               <FilePath>..\Core\Clock\segment.h</FilePath>
             </File>
+            <File>
+              <FileName>melody.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Clock\melody.c</FilePath>
+            </File>
+            <File>
+              <FileName>melody.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Clock\melody.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

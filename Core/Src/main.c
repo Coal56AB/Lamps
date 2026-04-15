@@ -27,6 +27,7 @@
 #include "clock_manager.h"
 #include "menu.h"
 #include "segment.h"
+#include "melody.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,6 +79,50 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     Segment_Process();
   }
 }
+MelodyHandle melody;
+const Note mySong[] = {
+//    //1 ТАКТ
+//    {SOL2, NOTE_QUARTER},
+//    {MI3, NOTE_EIGHTH},
+//    {SI3, NOTE_EIGHTH},
+//    {MI4, NOTE_EIGHTH},
+//    {SI3, NOTE_EIGHTH},
+//    {SOL3, NOTE_EIGHTH},
+//    {SI3, NOTE_EIGHTH},
+//    {DO4, NOTE_EIGHTH_DOT},
+//    {LA3, NOTE_SIXTEENTH},
+//    {SI3, NOTE_EIGHTH},
+//    {SI2, NOTE_EIGHTH_DOT},
+//    {DO2, NOTE_SIXTEENTH},
+//    {SI3, NOTE_EIGHTH},
+//    {MI3, NOTE_QUARTER},
+    
+    //2 ТАКТ
+    {RE3s, NOTE_QUARTER},
+    {SI2, NOTE_EIGHTH},
+    {LA2, NOTE_EIGHTH},
+    {LA3, NOTE_EIGHTH},
+    {SI3, NOTE_SIXTEENTH},
+    {LA3, NOTE_EIGHTH},
+    {RE3, NOTE_SIXTEENTH},
+    {FA4s, NOTE_SIXTEENTH},
+    {LA4, NOTE_SIXTEENTH},
+    {RE3s, NOTE_EIGHTH},
+    {LA3, NOTE_SIXTEENTH},
+    {RE3s, NOTE_EIGHTH},
+    
+    {SI4, NOTE_SIXTEENTH},
+    {FA4s, NOTE_SIXTEENTH},
+    {RE3s, NOTE_THIRTYSECOND},
+    {NOTE_REST, NOTE_THIRTYSECOND},
+    {RE3s, NOTE_EIGHTH},
+    {MI3, NOTE_EIGHTH},
+    
+    {DO3, NOTE_SIXTEENTH},
+    {SI2, NOTE_SIXTEENTH},
+    {MI3, NOTE_SIXTEENTH},
+};
+
 /* USER CODE END 0 */
 
 /**
@@ -111,6 +156,7 @@ int main(void)
   MX_GPIO_Init();
   MX_RTC_Init();
   MX_TIM2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -120,10 +166,16 @@ int main(void)
   Segment_Init();
   ClockManager_Init();
   Menu_Init();
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim2);
+  // Инициализация с BPM = 120
+  Melody_Init(&melody, &htim1, TIM_CHANNEL_1, 72000000);
+  
+  Melody_Play(&melody, mySong, sizeof(mySong)/sizeof(mySong[0]), 80);
   while (1)
   {
     Menu_Process();
+    Melody_Update(&melody);
 
     /* USER CODE END WHILE */
 
