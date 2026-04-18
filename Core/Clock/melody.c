@@ -1,6 +1,7 @@
 #include "melody.h"
 
-#define FIXED_ARR 10  // фиксированный период таймера
+#define FIXED_ARR 1000  // фиксированный период таймера
+#define FIXED_VOLUME 2  // фиксированный период таймера
 
 // Конвертирует длительность ноты в миллисекунды
 static uint32_t _duration_to_ms(MelodyHandle* mh, float duration) {
@@ -31,7 +32,7 @@ static void _set_freq(MelodyHandle* mh, uint32_t freq) {
     // Фиксированный период
     __HAL_TIM_SET_AUTORELOAD(mh->htim, FIXED_ARR);
     // Скважность 50% для чистого тона
-    __HAL_TIM_SET_COMPARE(mh->htim, mh->channel, FIXED_ARR / 2);
+    __HAL_TIM_SET_COMPARE(mh->htim, mh->channel, FIXED_VOLUME);
 }
 
 void Melody_Init(MelodyHandle* mh, TIM_HandleTypeDef* htim, uint32_t channel, uint32_t timer_clock_hz) {
