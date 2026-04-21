@@ -25,7 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "clock_manager.h"
-#include "menu.h"
+#include "menu_items.h"
 #include "segment.h"
 #include "melody.h"
 #include "songs.h"
@@ -81,7 +81,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   }
 }
 
-MelodyHandle melody;
 #define curr_song Polyphia_OD
 Melody_t *mySong = &curr_song;
 
@@ -127,12 +126,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   Segment_Init();
   ClockManager_Init();
-  Menu_Init();
+  Menu_Init(&g_clockNode);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim2);
+  MenuItems_Init();
   Melody_Init(&melody, &htim1, TIM_CHANNEL_1, 72000000);
   
-  Melody_Play(&melody, mySong, 134);
+//  Melody_Play(&melody, mySong, 134);
   while (1)
   {
     Menu_Process();

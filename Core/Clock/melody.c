@@ -1,5 +1,6 @@
 #include "melody.h"
 
+MelodyHandle melody;
 #define FIXED_ARR 1000  // фиксированный период таймера
 #define FIXED_VOLUME 2  // фиксированный период таймера
 

@@ -778,6 +778,16 @@
               <FilePath>..\Core\Clock\clock_manager.h</FilePath>
             </File>
             <File>
+              <FileName>menu_items.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Clock\menu_items.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_items.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Clock\menu_items.h</FilePath>
+            </File>
+            <File>
               <FileName>menu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Clock\menu.c</FilePath>
@@ -811,6 +821,11 @@
               <FileName>songs.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Core\Clock\songs.h</FilePath>
+            </File>
+            <File>
+              <FileName>sounds.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Clock\sounds.h</FilePath>
             </File>
             <File>
               <FileName>notes.h</FileName>

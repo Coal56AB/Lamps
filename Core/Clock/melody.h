@@ -3,7 +3,7 @@
 
 #include "stm32f1xx_hal.h"
 #include "songs.h"
-//#include "sounds.h"
+#include "sounds.h"
 
 typedef struct {
     TIM_HandleTypeDef* htim;
@@ -15,6 +15,7 @@ typedef struct {
     uint8_t is_playing;
     uint16_t bpm;
 } MelodyHandle;
+extern MelodyHandle melody;
 
 void Melody_Init(MelodyHandle* mh, TIM_HandleTypeDef* htim, uint32_t channel, uint32_t timer_clock_hz);
 void Melody_SetBPM(MelodyHandle* mh, uint16_t bpm);
