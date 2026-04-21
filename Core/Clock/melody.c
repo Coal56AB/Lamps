@@ -39,8 +39,7 @@ void Melody_Init(MelodyHandle* mh, TIM_HandleTypeDef* htim, uint32_t channel, ui
     mh->htim = htim;
     mh->channel = channel;
     mh->timer_clock_hz = timer_clock_hz;
-    mh->sequence = NULL;
-    mh->length = 0;
+    mh->melody = NULL;
     mh->current_index = 0;
     mh->note_start_time = 0;
     mh->is_playing = 0;
@@ -57,20 +56,19 @@ void Melody_SetBPM(MelodyHandle* mh, uint16_t bpm) {
     mh->bpm = bpm;
 }
 
-void Melody_Play(MelodyHandle* mh, const Note* sequence, uint16_t length, uint16_t bpm) {
+void Melody_Play(MelodyHandle* mh, Melody_t *melody, uint16_t bpm) {
     if (mh->is_playing) {
         _set_freq(mh, 0);
     }
     
-    mh->sequence = sequence;
-    mh->length = length;
+    mh->melody = melody;
     mh->current_index = 0;
     mh->is_playing = 1;
     mh->note_start_time = HAL_GetTick();
     mh->bpm = bpm;
     
-    if (length > 0 && sequence[0].freq != 0) {
-        _set_freq(mh, sequence[0].freq);
+    if (melody->length > 0 && melody->sequence[0].freq != 0) {
+        _set_freq(mh, melody->sequence[0].freq);
     }
 }
 
@@ -83,22 +81,22 @@ void Melody_Update(MelodyHandle* mh) {
     if (!mh->is_playing) return;
     
     uint32_t now = HAL_GetTick();
-    uint32_t dur_ms = _duration_to_ms(mh, mh->sequence[mh->current_index].duration);
+    uint32_t dur_ms = _duration_to_ms(mh, mh->melody->sequence[mh->current_index].duration);
     
     if (now - mh->note_start_time >= dur_ms) {
         mh->current_index++;
         
-        if (mh->current_index >= mh->length) {
+        if (mh->current_index >= mh->melody->length) {
             Melody_Stop(mh);
             return;
         }
         
         mh->note_start_time = now;
         
-        if (mh->sequence[mh->current_index].freq == NOTE_REST) {
+        if (mh->melody->sequence[mh->current_index].freq == NOTE_REST) {
             __HAL_TIM_SET_COMPARE(mh->htim, mh->channel, 0);
         } else {
-            _set_freq(mh, mh->sequence[mh->current_index].freq);
+            _set_freq(mh, mh->melody->sequence[mh->current_index].freq);
         }
     }
 }

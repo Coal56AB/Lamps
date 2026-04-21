@@ -812,6 +812,11 @@
               <FileType>5</FileType>
               <FilePath>..\Core\Clock\songs.h</FilePath>
             </File>
+            <File>
+              <FileName>notes.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Clock\notes.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

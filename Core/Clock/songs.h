@@ -1,10 +1,10 @@
 #pragma once
 
-#include "melody.h"
+#include "notes.h"
 
-#define song_length(song_arr)  sizeof(song_arr)/sizeof(song_arr[0]);
+#define song_length(song_arr)  sizeof(song_arr)/sizeof(song_arr[0])
 
-const Note Polyphia_OD[] = {
+static const Note_t Polyphia_OD_Notes[] = {
 	//1 ТАКТ
 	{FA1s, NOTE_SIXTEENTH},
 	{LA1, NOTE_SIXTEENTH},
@@ -77,10 +77,11 @@ const Note Polyphia_OD[] = {
 	{FA2s, NOTE_SIXTEENTH},
 	{SI2, NOTE_SIXTEENTH}
 };
+static Melody_t Polyphia_OD = {song_length(Polyphia_OD_Notes), Polyphia_OD_Notes};
 
 
 
-const Note Polyphia_PlayingGod[] = {
+static const Note_t Polyphia_PlayingGod_Notes[] = {
 	//1 ТАКТ
 	{SOL2, NOTE_QUARTER},
 	{MI3, NOTE_EIGHTH},
@@ -122,3 +123,4 @@ const Note Polyphia_PlayingGod[] = {
 	{SI2, NOTE_SIXTEENTH},
 	{MI3, NOTE_SIXTEENTH},
 };
+static Melody_t Polyphia_PlayingGod = {song_length(Polyphia_PlayingGod_Notes), Polyphia_PlayingGod_Notes};

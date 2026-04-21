@@ -83,8 +83,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 MelodyHandle melody;
 #define curr_song Polyphia_OD
-Note *mySong = (Note *)curr_song;
-int mySong_length = song_length(curr_song);
+Melody_t *mySong = &curr_song;
 
 /* USER CODE END 0 */
 
@@ -133,7 +132,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   Melody_Init(&melody, &htim1, TIM_CHANNEL_1, 72000000);
   
-  Melody_Play(&melody, mySong, mySong_length, 134);
+  Melody_Play(&melody, mySong, 134);
   while (1)
   {
     Menu_Process();
