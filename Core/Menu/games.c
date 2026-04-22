@@ -133,6 +133,7 @@ static void Display_Reaction(void) {
 
 static void OnEnter_Reaction(void) {
     g_gameReaction.state = 0;
+    g_ctx.debounceTime = 0;
     Menu_Refresh();
 }
 
@@ -144,13 +145,14 @@ static void Reaction_OnButton(Button_Type btn, bool longPress) {
     
     if (btn == BUTTON_BACK) {
         Menu_GoBack();
+        g_ctx.debounceTime = 30;
     }
     
     uint32_t tick = HAL_GetTick();
     if (g_gameReaction.state == 0 && btn == BUTTON_SELECT) {
         g_gameReaction.state = 1;
         g_gameReaction.waitStart = tick;
-        g_gameReaction.ledOnTime = 500 + (rand() % 2000);
+        g_gameReaction.ledOnTime = 1200 + (rand() % 2000);
         Menu_Refresh();
     }
     else if (g_gameReaction.state == 1 && btn == BUTTON_SELECT) {
@@ -165,7 +167,10 @@ static void Reaction_OnButton(Button_Type btn, bool longPress) {
     }
     else if ((g_gameReaction.state >= 3) && (btn == BUTTON_SELECT))
     {
-      g_gameReaction.state = 0;
+      g_gameReaction.state = 1;
+        g_gameReaction.state = 1;
+        g_gameReaction.waitStart = tick;
+        g_gameReaction.ledOnTime = 500 + (rand() % 2000);
     }
 }
 

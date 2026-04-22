@@ -15,7 +15,7 @@ void Menu_Init(MenuNode* startNode) {
     g_ctx.currentNode = startNode;
     g_ctx.needsRedraw = true;
     g_ctx.lastTick = 0;
-    
+    g_ctx.debounceTime = 30;
     if (startNode && startNode->onEnter) {
         startNode->onEnter();
     }
@@ -116,7 +116,7 @@ void Menu_Process(void) {
             g_ctx.lastDebounceTime[i] = tick;
         }
         
-        if ((tick - g_ctx.lastDebounceTime[i]) > 30) {  // DEBOUNCE_MS = 30
+        if ((tick - g_ctx.lastDebounceTime[i]) >= g_ctx.debounceTime) {  // DEBOUNCE_MS = 30
             if (reading != g_ctx.buttonState[i]) {
                 g_ctx.buttonState[i] = reading;
                 

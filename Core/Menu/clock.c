@@ -166,7 +166,7 @@ static void Timer_OnButton(Button_Type btn, bool longPress) {
 
 // NODES
 MenuNode g_clockNode = {
-    .name = "CLOC",
+    .name = "CLOCH",
     .parent = NULL,
     .children = NULL,
     .childCount = 0,
@@ -194,7 +194,7 @@ MenuNode g_stopwatchNode = {
 };
 
 MenuNode g_timerNode = {
-    .name = "TIMER",
+    .name = "TIHER",
     .parent = NULL,
     .children = NULL,
     .childCount = 0,

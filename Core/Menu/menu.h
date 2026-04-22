@@ -42,7 +42,7 @@ typedef struct {
     uint32_t lastTick;
     bool needsRedraw;
   
-  
+    int32_t   debounceTime;
     uint32_t  lastDebounceTime[BUTTON_COUNT];
     uint8_t   lastButtonState[BUTTON_COUNT];
     uint8_t   buttonState[BUTTON_COUNT];
