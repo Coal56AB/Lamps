@@ -13,13 +13,13 @@ volatile uint8_t GLOBAL_BRIGHTNESS = 100;      // Глобальная ярко�
 #define SWAP_BIT5_BIT6(x) (((x) & 0x9F) | (((x) & 0x20) << 1) | (((x) & 0x40) >> 1))
 
 // Макросы для быстрой работы с пинами (вместо HAL_GPIO_WritePin)
-#define SET_SEGMENT_A(val) SEGMENT_A_GPIO_Port->BSRR = (SEGMENT_A_Pin << 16) | ((val) ? 0 : SEGMENT_A_Pin)
-#define SET_SEGMENT_B(val) SEGMENT_B_GPIO_Port->BSRR = (SEGMENT_B_Pin << 16) | ((val) ? 0 : SEGMENT_B_Pin)
-#define SET_SEGMENT_C(val) SEGMENT_C_GPIO_Port->BSRR = (SEGMENT_C_Pin << 16) | ((val) ? 0 : SEGMENT_C_Pin)
-#define SET_SEGMENT_D(val) SEGMENT_D_GPIO_Port->BSRR = (SEGMENT_D_Pin << 16) | ((val) ? 0 : SEGMENT_D_Pin)
-#define SET_SEGMENT_E(val) SEGMENT_E_GPIO_Port->BSRR = (SEGMENT_E_Pin << 16) | ((val) ? 0 : SEGMENT_E_Pin)
-#define SET_SEGMENT_F(val) SEGMENT_F_GPIO_Port->BSRR = (SEGMENT_F_Pin << 16) | ((val) ? 0 : SEGMENT_F_Pin)
-#define SET_SEGMENT_G(val) SEGMENT_G_GPIO_Port->BSRR = (SEGMENT_G_Pin << 16) | ((val) ? 0 : SEGMENT_G_Pin)
+#define SET_SEGMENT_A(val) SEGMENT_A_GPIO_Port->BSRR = ((uint32_t)SEGMENT_A_Pin << 16) | ((val) ? 0 : SEGMENT_A_Pin)
+#define SET_SEGMENT_B(val) SEGMENT_B_GPIO_Port->BSRR = ((uint32_t)SEGMENT_B_Pin << 16) | ((val) ? 0 : SEGMENT_B_Pin)
+#define SET_SEGMENT_C(val) SEGMENT_C_GPIO_Port->BSRR = ((uint32_t)SEGMENT_C_Pin << 16) | ((val) ? 0 : SEGMENT_C_Pin)
+#define SET_SEGMENT_D(val) SEGMENT_D_GPIO_Port->BSRR = ((uint32_t)SEGMENT_D_Pin << 16) | ((val) ? 0 : SEGMENT_D_Pin)
+#define SET_SEGMENT_E(val) SEGMENT_E_GPIO_Port->BSRR = ((uint32_t)SEGMENT_E_Pin << 16) | ((val) ? 0 : SEGMENT_E_Pin)
+#define SET_SEGMENT_F(val) SEGMENT_F_GPIO_Port->BSRR = ((uint32_t)SEGMENT_F_Pin << 16) | ((val) ? 0 : SEGMENT_F_Pin)
+#define SET_SEGMENT_G(val) SEGMENT_G_GPIO_Port->BSRR = ((uint32_t)SEGMENT_G_Pin << 16) | ((val) ? 0 : SEGMENT_G_Pin)
 
 // ==================== Таблица символов ====================
 // Для общего анода: 0 - сегмент горит, 1 - сегмент не горит

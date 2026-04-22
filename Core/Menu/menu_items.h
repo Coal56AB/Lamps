@@ -3,7 +3,9 @@
 
 #include "menu.h"
 
+extern MenuNode* g_currentActivity;
 // Глобальные узлы меню (для доступа из main.c)
+extern MenuNode g_rootMenu;
 extern MenuNode g_clockNode;
 extern MenuNode g_timerNode;
 extern MenuNode g_stopwatchNode;

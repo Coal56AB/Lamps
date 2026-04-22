@@ -62,18 +62,20 @@ void Menu_HandleButton(Button_Type btn, bool longPress) {
         switch (btn) {
             case BUTTON_UP:
                 SOUND_CLICK;
-                if (g_ctx.currentNode->selectedChild > 0) {
-                    g_ctx.currentNode->selectedChild--;
-                    g_ctx.needsRedraw = true;
+                g_ctx.currentNode->selectedChild--;
+                if (g_ctx.currentNode->selectedChild > g_ctx.currentNode->childCount - 1) {
+                  g_ctx.currentNode->selectedChild = g_ctx.currentNode->childCount - 1;
                 }
+                g_ctx.needsRedraw = true;
                 break;
                 
             case BUTTON_DOWN:
                 SOUND_CLICK;
-                if (g_ctx.currentNode->selectedChild < g_ctx.currentNode->childCount - 1) {
-                    g_ctx.currentNode->selectedChild++;
-                    g_ctx.needsRedraw = true;
+                g_ctx.currentNode->selectedChild++;
+                if (g_ctx.currentNode->selectedChild > g_ctx.currentNode->childCount - 1) {
+                g_ctx.currentNode->selectedChild = 0;
                 }
+                g_ctx.needsRedraw = true;
                 break;
                 
             case BUTTON_SELECT: {
