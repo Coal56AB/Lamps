@@ -120,10 +120,14 @@ static void OnUpdate_Reaction(void) {
 
 static void Display_Reaction(void) {
     char buf[7];
+    g_ctx.debounceTime = 30;
     switch (g_gameReaction.state) {
         case 0: sprintf(buf, "START"); break;
         case 1: sprintf(buf, "      "); break;
-        case 2: sprintf(buf, "888888"); break;
+        case 2: 
+          sprintf(buf, "888888"); 
+          g_ctx.debounceTime = 0;
+          break;
         case 3: sprintf(buf, "%6d", g_gameReaction.reactionTime); break;
         case 4: sprintf(buf, "FAIL"); break;
         default: sprintf(buf, "ERROR"); break;
