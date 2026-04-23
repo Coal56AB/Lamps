@@ -1,4 +1,5 @@
 #include "menu_items.h"
+#include "clock.h"
 #include "segment.h"
 #include "clock_manager.h"
 #include <string.h>

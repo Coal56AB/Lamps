@@ -23,4 +23,19 @@ void ClockManager_SetDuty(uint8_t value);
 // Сброс времени на 00:00:00
 void ClockManager_ResetTime(void);
 
+// LED control
+void ClockManager_SetLEDState(uint8_t state);
+uint8_t ClockManager_GetLEDState(void);
+
+// PowerOn Song (DR5)
+void ClockManager_SetPowerOnSong(uint8_t song);
+uint8_t ClockManager_GetPowerOnSong(void);
+
+// Alarm Song (DR6)
+void ClockManager_SetAlarmSong(uint8_t song);
+uint8_t ClockManager_GetAlarmSong(void);
+
+// Menu Sound
+void ClockManager_SetMenuSound(uint8_t enabled);
+uint8_t ClockManager_GetMenuSound(void);
 #endif

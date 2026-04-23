@@ -1,4 +1,5 @@
 #include "menu_items.h"
+#include "games.h"
 #include "segment.h"
 #include "clock_manager.h"
 #include "menu_items.h"

@@ -29,6 +29,7 @@
 #include "segment.h"
 #include "melody.h"
 #include "songs.h"
+#include "clock.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -137,7 +138,7 @@ int main(void)
   {
     Menu_Process();
     Melody_Update(&melody);
-
+    ClockManager_GetTime(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

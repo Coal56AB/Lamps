@@ -1,5 +1,5 @@
-#ifndef GAMES_H
-#define GAMES_H
+#ifndef CLOCK_H
+#define CLOCK_H
 
 #include "menu.h"
 extern MenuNode g_clockNode;

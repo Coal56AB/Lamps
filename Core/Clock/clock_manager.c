@@ -4,15 +4,22 @@
 
 static uint8_t dutyValue = 5;
 static time_t currentTime;
+static uint8_t led_enable;
 RTC_TimeTypeDef rtc_time;
+
+#define BKP_DR_DUTY         RTC_BKP_DR1
+#define BKP_DR_LED_STATE    RTC_BKP_DR2
+#define BKP_DR_POWERON_SONG RTC_BKP_DR5
+#define BKP_DR_ALARM_SONG   RTC_BKP_DR6
+#define BKP_DR_MENU_SOUND   RTC_BKP_DR3
 
 // Яркость в RTC Backup Register (используем BKP_DR1)
 static void SaveDuty(void) {
-    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR1, dutyValue);
+    HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_DUTY, dutyValue);
 }
 
 static void LoadDuty(void) {
-    uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR1);
+    uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_DUTY);
     dutyValue = (val <= 10 && val > 0) ? (uint8_t)val : 5;
 }
 
@@ -24,6 +31,10 @@ void ClockManager_Init(void) {
     if (HAL_RTC_GetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN) != HAL_OK) {
         ClockManager_ResetTime();
     }
+    ClockManager_GetMenuSound();
+    ClockManager_GetAlarmSong();
+    ClockManager_GetPowerOnSong();
+    ClockManager_GetPowerOnSong();
 }
 
 time_t ClockManager_GetTime(int blink) {
@@ -33,7 +44,12 @@ time_t ClockManager_GetTime(int blink) {
     if(blink)
     {
       if(currentTime.sec != rtc_time.Seconds)
-        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+      {
+        if(led_enable)
+          HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+        else
+          HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+      }
     }
     currentTime.sec = rtc_time.Seconds;
     return currentTime;
@@ -63,4 +79,65 @@ void ClockManager_SetDuty(uint8_t value) {
 
 void ClockManager_ResetTime(void) {
     ClockManager_SetTime(0, 0, 0);
+}
+
+
+// LED State in Backup Register
+
+void ClockManager_SetLEDState(uint8_t state) {
+    if (state) {
+        led_enable = 1;
+    } else {
+        led_enable = 0;
+    }
+    HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_LED_STATE, state ? 1 : 0);
+}
+
+uint8_t ClockManager_GetLEDState(void) {
+    uint32_t led_enable = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_LED_STATE);
+    if (led_enable == 0 || led_enable == 1) {
+        // Сохраненное значение корректно
+    } else {
+        led_enable = 1;  // По умолчанию LED включен
+    }
+    return (uint8_t)led_enable;
+}
+
+// PowerOn Song in Backup Register
+void ClockManager_SetPowerOnSong(uint8_t song) {
+    if (song > 10) song = 10;
+    HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_POWERON_SONG, song);
+}
+
+uint8_t ClockManager_GetPowerOnSong(void) {
+    uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_POWERON_SONG);
+    if (val > 10) val = 0;
+    return (uint8_t)val;
+}
+
+// Alarm Song in Backup Register
+
+void ClockManager_SetAlarmSong(uint8_t song) {
+    if (song > 10) song = 10;
+    HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_ALARM_SONG, song);
+}
+
+uint8_t ClockManager_GetAlarmSong(void) {
+    uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_ALARM_SONG);
+    if (val > 10) val = 0;
+    return (uint8_t)val;
+}
+
+// Menu Sound State in Backup Register
+extern uint8_t g_sound_enabled;
+
+void ClockManager_SetMenuSound(uint8_t enabled) {
+    g_sound_enabled = enabled ? 1 : 0;
+    HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_MENU_SOUND, g_sound_enabled);
+}
+
+uint8_t ClockManager_GetMenuSound(void) {
+    uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_MENU_SOUND);
+    g_sound_enabled = (val == 0 || val == 1) ? (uint8_t)val : 1;
+    return g_sound_enabled;
 }
