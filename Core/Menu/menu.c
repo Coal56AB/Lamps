@@ -123,9 +123,10 @@ void Menu_Process(void) {
                 if (g_ctx.buttonState[i]) {
                     g_ctx.pressStartTime[i] = tick;
                     g_ctx.longPressTriggered[i] = false;
+                    Menu_HandleButton((Button_Type)i, false);
                 } else {
                     if (!g_ctx.longPressTriggered[i]) {
-                        Menu_HandleButton((Button_Type)i, false);
+//                        Menu_HandleButton((Button_Type)i, false);
                     }
                 }
             }
