@@ -120,14 +120,10 @@ static void OnUpdate_Reaction(void) {
 
 static void Display_Reaction(void) {
     char buf[7];
-    g_ctx.debounceTime = 30;
     switch (g_gameReaction.state) {
         case 0: sprintf(buf, "START"); break;
         case 1: sprintf(buf, "      "); break;
-        case 2: 
-          sprintf(buf, "888888"); 
-          g_ctx.debounceTime = 0;
-          break;
+        case 2: sprintf(buf, "888888"); break;
         case 3: sprintf(buf, "%6d", g_gameReaction.reactionTime); break;
         case 4: sprintf(buf, "FAIL"); break;
         default: sprintf(buf, "ERROR"); break;
@@ -158,24 +154,27 @@ static void Reaction_OnButton(Button_Type btn, bool longPress) {
         g_gameReaction.state = 1;
         g_gameReaction.waitStart = tick;
         g_gameReaction.ledOnTime = 1200 + (rand() % 2000);
+        g_ctx.debounceTime = 0;
         Menu_Refresh();
     }
     else if (g_gameReaction.state == 1 && btn == BUTTON_SELECT) {
         g_gameReaction.reactionTime = 0;
         g_gameReaction.state = 4;
+        g_ctx.debounceTime = 30;
         Menu_Refresh();
     }
     else if (g_gameReaction.state == 2 && btn == BUTTON_SELECT) {
         g_gameReaction.reactionTime = tick - g_gameReaction.waitStart;
         g_gameReaction.state = 3;
+        g_ctx.debounceTime = 30;
         Menu_Refresh();
     }
     else if ((g_gameReaction.state >= 3) && (btn == BUTTON_SELECT))
     {
       g_gameReaction.state = 1;
-        g_gameReaction.state = 1;
-        g_gameReaction.waitStart = tick;
-        g_gameReaction.ledOnTime = 500 + (rand() % 2000);
+      g_gameReaction.waitStart = tick;
+      g_gameReaction.ledOnTime = 500 + (rand() % 2000);
+      g_ctx.debounceTime = 0;
     }
 }
 
