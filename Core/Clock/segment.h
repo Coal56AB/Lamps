@@ -26,6 +26,10 @@ void Segment_SetTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
 // Установка глобальной яркости (0-100%)
 void Segment_SetBrightness(uint8_t percent);
 
+// Fade level: 0 - instant, 10 - slowest
+void Segment_SetFade(uint8_t level);
+uint8_t Segment_GetFade(void);
+
 // ==================== Обновление дисплея ====================
 // Основная функция обновления дисплея
 // Вызывается каждые PROCESS_INTERVAL_US микросекунд или из таймера

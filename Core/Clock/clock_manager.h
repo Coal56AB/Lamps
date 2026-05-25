@@ -20,6 +20,10 @@ uint8_t ClockManager_GetDuty(void);
 // Установить яркость (0-10) и сохранить
 void ClockManager_SetDuty(uint8_t value);
 
+// Fade level: 0 - instant, 10 - slowest
+uint8_t ClockManager_GetFade(void);
+void ClockManager_SetFade(uint8_t value);
+
 // Сброс времени на 00:00:00
 void ClockManager_ResetTime(void);
 

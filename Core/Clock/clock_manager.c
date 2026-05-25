@@ -3,6 +3,7 @@
 #include "rtc.h"
 
 static uint8_t dutyValue = 5;
+static uint8_t fadeValue = 5;
 static time_t currentTime;
 static uint8_t led_enable;
 RTC_TimeTypeDef rtc_time;
@@ -12,6 +13,7 @@ RTC_TimeTypeDef rtc_time;
 #define BKP_DR_POWERON_SONG RTC_BKP_DR5
 #define BKP_DR_ALARM_SONG   RTC_BKP_DR6
 #define BKP_DR_MENU_SOUND   RTC_BKP_DR3
+#define BKP_DR_FADE         RTC_BKP_DR4
 
 // Яркость в RTC Backup Register (используем BKP_DR1)
 static void SaveDuty(void) {
@@ -23,9 +25,20 @@ static void LoadDuty(void) {
     dutyValue = (val <= 10 && val > 0) ? (uint8_t)val : 5;
 }
 
+static void SaveFade(void) {
+    HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_FADE, fadeValue);
+}
+
+static void LoadFade(void) {
+    uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_FADE);
+    fadeValue = (val <= 10) ? (uint8_t)val : 5;
+}
+
 void ClockManager_Init(void) {
     LoadDuty();
+    LoadFade();
     Segment_SetBrightness(dutyValue * 10);
+    Segment_SetFade(fadeValue);
     
     // Если RTC не инициализирован - сброс времени
     if (HAL_RTC_GetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN) != HAL_OK) {
@@ -75,6 +88,17 @@ void ClockManager_SetDuty(uint8_t value) {
     dutyValue = value;
     Segment_SetBrightness(dutyValue * 10);
     SaveDuty();
+}
+
+uint8_t ClockManager_GetFade(void) {
+    return fadeValue;
+}
+
+void ClockManager_SetFade(uint8_t value) {
+    if (value > 10) value = 10;
+    fadeValue = value;
+    Segment_SetFade(fadeValue);
+    SaveFade();
 }
 
 void ClockManager_ResetTime(void) {

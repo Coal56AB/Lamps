@@ -4,6 +4,12 @@
 // ==================== Конфигурация ====================
 #define DIGITS_COUNT 6          // Количество разрядов
 #define PROCESS_INTERVAL_US 10  // Интервал вызова Segment_Process в микросекундах
+#define SEGMENT_FADE_INTERVAL_US 20000
+#define SEGMENT_FADE_DEFAULT 5
+#define SEGMENT_FADE_MAX 10
+#define SEGMENT_FADE_STEPS_PER_LEVEL 5
+#define SEGMENT_BRIGHTNESS_MAX 100
+#define SEGMENT_FADE_INTERVAL_TICKS (SEGMENT_FADE_INTERVAL_US / PROCESS_INTERVAL_US)
 
 volatile uint32_t REFRESH_RATE = 80;         // Частота обновления всех цифр в Гц (можно менять)
 volatile uint8_t GLOBAL_BRIGHTNESS = 100;      // Глобальная яркость в процентах (0-100)
@@ -74,11 +80,18 @@ static const CharMap charTable[] = {
 
 // ==================== Статические переменные ====================
 static uint8_t displayBuffer[DIGITS_COUNT];  // Буфер СРАЗУ МАСОК сегментов
+static uint8_t segmentBrightness[DIGITS_COUNT][7];
+static uint8_t segmentTargetBrightness[DIGITS_COUNT][7];
 static uint8_t currentPos;
 
 static uint32_t pwmCounter;
 static uint32_t currentDigitTime;
-static uint32_t currentPwmThreshold;
+static uint32_t currentSegmentThreshold[7];
+static uint32_t fadeCounter;
+static uint8_t fadeLevel = SEGMENT_FADE_DEFAULT;
+static uint8_t fadeStepPercent = SEGMENT_BRIGHTNESS_MAX /
+                                 (SEGMENT_FADE_DEFAULT * SEGMENT_FADE_STEPS_PER_LEVEL);
+static uint8_t lastOutputMask;
 
 // ==================== Низкий уровень ====================
 static void SetSegments(uint8_t mask) {
@@ -98,6 +111,73 @@ static uint8_t GetCharMask(char c) {
       return charTable[i].mask;
   }
   return 0xFF; // если символ неизвестен — пусто
+}
+
+static uint8_t GetSegmentTarget(uint8_t mask, uint8_t segment) {
+  return ((mask >> segment) & 1) ? 0 : SEGMENT_BRIGHTNESS_MAX;
+}
+
+static void SetDigitTargetMask(uint8_t pos, uint8_t mask) {
+  if (pos >= DIGITS_COUNT) return;
+  if (displayBuffer[pos] == mask) return;
+
+  displayBuffer[pos] = mask;
+  for (uint8_t segment = 0; segment < 7; segment++) {
+    segmentTargetBrightness[pos][segment] = GetSegmentTarget(mask, segment);
+  }
+}
+
+static void UpdateFadeLevels(void) {
+  uint32_t interval = SEGMENT_FADE_INTERVAL_TICKS;
+  if (interval < 1) interval = 1;
+
+  fadeCounter++;
+  if (fadeCounter < interval) return;
+  fadeCounter = 0;
+
+  for (uint8_t pos = 0; pos < DIGITS_COUNT; pos++) {
+    for (uint8_t segment = 0; segment < 7; segment++) {
+      uint8_t current = segmentBrightness[pos][segment];
+      uint8_t target = segmentTargetBrightness[pos][segment];
+      uint8_t step = fadeStepPercent;
+      if (step < 1) step = 1;
+
+      if (current < target) {
+        uint8_t next = current + step;
+        segmentBrightness[pos][segment] = (next > target) ? target : next;
+      } else if (current > target) {
+        segmentBrightness[pos][segment] =
+            (current > step + target) ? (current - step) : target;
+      }
+    }
+  }
+}
+
+static void UpdateCurrentSegmentThresholds(void) {
+  for (uint8_t segment = 0; segment < 7; segment++) {
+    uint32_t threshold = currentDigitTime *
+                         (uint32_t)GLOBAL_BRIGHTNESS *
+                         segmentBrightness[currentPos][segment];
+    threshold /= (100UL * SEGMENT_BRIGHTNESS_MAX);
+
+    if (threshold > currentDigitTime) threshold = currentDigitTime;
+    currentSegmentThreshold[segment] = threshold;
+  }
+}
+
+static uint8_t BuildCurrentDigitMask(void) {
+  uint8_t mask = 0xFF;
+
+  for (uint8_t segment = 0; segment < 7; segment++) {
+    if (pwmCounter < currentSegmentThreshold[segment]) {
+      mask &= (uint8_t)~(1U << segment);
+    }
+  }
+
+  if (currentPos == 5)
+    mask = SWAP_BIT5_BIT6(mask);
+
+  return mask;
 }
 
 // ==================== Управление разрядами ====================
@@ -138,30 +218,29 @@ static void NextDigit(void) {
   currentDigitTime = totalCalls / DIGITS_COUNT;
   if (currentDigitTime < 1) currentDigitTime = 1;
 
-  currentPwmThreshold = (currentDigitTime * GLOBAL_BRIGHTNESS) / 100;
-
   pwmCounter = 0;
+  lastOutputMask = 0xFF;
 }
 
 static void UpdateOneDigit(void) {
+  uint8_t mask;
+
   if (pwmCounter == 0) {
     DisableAllDigits();
 
     __NOP(); __NOP(); // анти-гостинг
 
-    uint8_t mask = displayBuffer[currentPos];
-
-    // SWAP только для позиции 5
-    if (currentPos == 5)
-      mask = SWAP_BIT5_BIT6(mask);
-
+    UpdateCurrentSegmentThresholds();
+    mask = BuildCurrentDigitMask();
     SetSegments(mask);
+    lastOutputMask = mask;
     EnableDigit(currentPos);
-   }
-
-  if (pwmCounter >= currentPwmThreshold) {
-    DisableAllDigits();
-    SetSegments(0xFF);
+  } else {
+    mask = BuildCurrentDigitMask();
+    if (mask != lastOutputMask) {
+      SetSegments(mask);
+      lastOutputMask = mask;
+    }
   }
 
   pwmCounter++;
@@ -178,10 +257,19 @@ void Segment_Init(void) {
   currentPos = 0;
   pwmCounter = 0;
   currentDigitTime = 1;
-  currentPwmThreshold = 1;
+  fadeCounter = 0;
+  lastOutputMask = 0xFF;
 
-  for (int i = 0; i < DIGITS_COUNT; i++)
+  for (int i = 0; i < DIGITS_COUNT; i++) {
     displayBuffer[i] = 0xFF; // пусто
+    for (int segment = 0; segment < 7; segment++) {
+      segmentBrightness[i][segment] = 0;
+      segmentTargetBrightness[i][segment] = 0;
+    }
+  }
+  for (int segment = 0; segment < 7; segment++) {
+    currentSegmentThreshold[segment] = 0;
+  }
 
   NextDigit();
 }
@@ -189,22 +277,22 @@ void Segment_Init(void) {
 // Установить символ в разряд
 void Segment_SetChar(uint8_t pos, char c) {
   if (pos >= DIGITS_COUNT) return;
-  displayBuffer[pos] = GetCharMask(c);
+  SetDigitTargetMask(pos, GetCharMask(c));
 }
 
 // Установить напрямую маску сегментов
 void Segment_SetRaw(uint8_t pos, uint8_t mask) {
   if (pos >= DIGITS_COUNT) return;
-  displayBuffer[pos] = mask;
+  SetDigitTargetMask(pos, mask);
 }
 
 // Установить строку (например "HELLO ")
 void Segment_SetString(const char *str) {
   for (int i = 0; i < DIGITS_COUNT; i++) {
     if (str[i] == 0)
-      displayBuffer[i] = 0xFF;
+      SetDigitTargetMask(i, 0xFF);
     else
-      displayBuffer[i] = GetCharMask(str[i]);
+      SetDigitTargetMask(i, GetCharMask(str[i]));
   }
 }
 
@@ -215,8 +303,31 @@ void Segment_SetBrightness(uint8_t percent) {
   GLOBAL_BRIGHTNESS = percent;
 }
 
+void Segment_SetFade(uint8_t level) {
+  if (level > SEGMENT_FADE_MAX) level = SEGMENT_FADE_MAX;
+  fadeLevel = level;
+
+  if (fadeLevel == 0) {
+    fadeStepPercent = SEGMENT_BRIGHTNESS_MAX;
+    for (uint8_t pos = 0; pos < DIGITS_COUNT; pos++) {
+      for (uint8_t segment = 0; segment < 7; segment++) {
+        segmentBrightness[pos][segment] = segmentTargetBrightness[pos][segment];
+      }
+    }
+  } else {
+    fadeStepPercent = SEGMENT_BRIGHTNESS_MAX /
+                      (fadeLevel * SEGMENT_FADE_STEPS_PER_LEVEL);
+    if (fadeStepPercent < 1) fadeStepPercent = 1;
+  }
+}
+
+uint8_t Segment_GetFade(void) {
+  return fadeLevel;
+}
+
 // Основная функция обновления дисплея
 // Вызывается каждые 10 микросекунд из таймера
 void Segment_Process(void) {
+  UpdateFadeLevels();
   UpdateOneDigit();
 }

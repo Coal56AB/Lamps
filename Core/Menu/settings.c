@@ -16,6 +16,8 @@ typedef struct {
 static TimeEditData g_timeData;
 static uint8_t g_originalDuty;
 static uint8_t g_editDuty;
+static uint8_t g_originalFade;
+static uint8_t g_editFade;
 
 /////// TIME EDIT ////////
 static void Display_TimeEdit(void) {
@@ -189,6 +191,54 @@ static void DutyEdit_OnButton(Button_Type btn, bool longPress) {
 }
 
 
+/////// FADE EDIT ////////
+static void Display_FadeEdit(void) {
+    char buf[7] = "FADE  ";
+    if (g_editFade == 10) {
+        buf[4] = '1';
+        buf[5] = '0';
+    } else {
+        buf[5] = '0' + g_editFade;
+    }
+    Segment_SetString(buf);
+}
+
+static void OnEnter_FadeEdit(void) {
+    g_originalFade = ClockManager_GetFade();
+    g_editFade = g_originalFade;
+    Segment_SetFade(g_editFade);
+}
+
+static void FadeEdit_OnButton(Button_Type btn, bool longPress) {
+    (void)longPress;
+    switch (btn) {
+        case BUTTON_UP:
+            if (g_editFade < 10) {
+                g_editFade++;
+                Segment_SetFade(g_editFade);
+                Menu_Refresh();
+            }
+            break;
+        case BUTTON_DOWN:
+            if (g_editFade > 0) {
+                g_editFade--;
+                Segment_SetFade(g_editFade);
+                Menu_Refresh();
+            }
+            break;
+        case BUTTON_SELECT:
+            ClockManager_SetFade(g_editFade);
+            Menu_GoBack();
+            break;
+        case BUTTON_BACK:
+            ClockManager_SetFade(g_originalFade);
+            Menu_GoBack();
+        default:
+            break;
+    }
+}
+
+
 
 
 /////// RESET ////////
@@ -201,6 +251,7 @@ static void Reset_OnButton(Button_Type btn, bool longPress) {
     if ((btn == BUTTON_SELECT) && longPress) {
         ClockManager_ResetTime();
         ClockManager_SetDuty(5);
+        ClockManager_SetFade(5);
         Menu_GoBack();
     }
 }
@@ -354,6 +405,19 @@ MenuNode g_dutyEditNode = {
     .data = &g_editDuty
 };
 
+MenuNode g_fadeEditNode = {
+    .name = "FADE",
+    .parent = &g_settingsNode,
+    .children = NULL,
+    .childCount = 0,
+    .selectedChild = 0,
+    .display = Display_FadeEdit,
+    .onEnter = OnEnter_FadeEdit,
+    .onUpdate = NULL,
+    .onButton = FadeEdit_OnButton,
+    .data = &g_editFade
+};
+
 MenuNode g_LEDEditNode = {
     .name = "LED",
     .parent = &g_settingsNode,
@@ -422,6 +486,7 @@ MenuNode g_resetNode = {
 MenuNode* g_settingsChildren[] = {
     &g_timeEditNode,
     &g_dutyEditNode,
+    &g_fadeEditNode,
     &g_LEDEditNode,
     &g_MenuSoundNode,
     &g_PowerOnSongNode,
