@@ -14,6 +14,8 @@ RTC_TimeTypeDef rtc_time;
 #define BKP_DR_ALARM_SONG   RTC_BKP_DR6
 #define BKP_DR_MENU_SOUND   RTC_BKP_DR3
 #define BKP_DR_FADE         RTC_BKP_DR4
+#define BKP_DR_INIT         RTC_BKP_DR7
+#define BKP_INIT_MAGIC      0x4C50U
 
 // Яркость в RTC Backup Register (используем BKP_DR1)
 static void SaveDuty(void) {
@@ -35,19 +37,35 @@ static void LoadFade(void) {
 }
 
 void ClockManager_Init(void) {
-    LoadDuty();
-    LoadFade();
+    if (HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_INIT) != BKP_INIT_MAGIC) {
+        /*
+         * A reset backup domain contains zeroes. Some zeroes are valid user
+         * settings, so individual range checks cannot distinguish the first
+         * start from saved configuration. Initialize the whole domain and
+         * write the marker last.
+         */
+        dutyValue = 5;
+        fadeValue = 5;
+        led_enable = 1;
+
+        ClockManager_ResetTime();
+        SaveDuty();
+        SaveFade();
+        HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_LED_STATE, 1);
+        HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_MENU_SOUND, 1);
+        HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_POWERON_SONG, 0);
+        HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_ALARM_SONG, 0);
+        HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_INIT, BKP_INIT_MAGIC);
+    } else {
+        LoadDuty();
+        LoadFade();
+        led_enable = ClockManager_GetLEDState();
+    }
+
     Segment_SetBrightness(dutyValue * 10);
     Segment_SetFade(fadeValue);
-    
-    // Если RTC не инициализирован - сброс времени
-    if (HAL_RTC_GetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN) != HAL_OK) {
-        ClockManager_ResetTime();
-    }
+
     ClockManager_GetMenuSound();
-    ClockManager_GetAlarmSong();
-    ClockManager_GetPowerOnSong();
-    ClockManager_GetPowerOnSong();
 }
 
 time_t ClockManager_GetTime(int blink) {
