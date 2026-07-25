@@ -42,4 +42,8 @@ uint8_t ClockManager_GetAlarmSong(void);
 // Menu Sound
 void ClockManager_SetMenuSound(uint8_t enabled);
 uint8_t ClockManager_GetMenuSound(void);
+
+// Sound volume: 0 - mute, 10 - maximum
+void ClockManager_SetVolume(uint8_t volume);
+uint8_t ClockManager_GetVolume(void);
 #endif

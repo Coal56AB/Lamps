@@ -132,11 +132,14 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   MenuItems_Init();
   Melody_Init(&melody, &htim1, TIM_CHANNEL_1, 72000000);
+  Melody_SetVolume(&melody, ClockManager_GetVolume());
+  Melody_PlaySong(&melody, ClockManager_GetPowerOnSong());
   
 //  Melody_Play(&melody, mySong, 134);
   while (1)
   {
     Menu_Process();
+    Timer_Update();
     Melody_Update(&melody);
     ClockManager_GetTime(1);
     /* USER CODE END WHILE */

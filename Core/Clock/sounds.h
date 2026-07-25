@@ -52,3 +52,15 @@ static const Note_t SFX_Alarm_Notes[] = {
     {LA4, NOTE_EIGHTH}
 };
 static Melody_t SFX_Alarm = {song_length(SFX_Alarm_Notes), SFX_Alarm_Notes};
+
+// Отдельная короткая фанфара для победы в игре
+static const Note_t SFX_Victory_Notes[] = {
+    {DO4, NOTE_EIGHTH},
+    {MI4, NOTE_EIGHTH},
+    {SOL4, NOTE_EIGHTH},
+    {DO4, NOTE_QUARTER},
+    {NOTE_REST, NOTE_SIXTEENTH},
+    {SOL4, NOTE_SIXTEENTH},
+    {DO4, NOTE_QUARTER}
+};
+static Melody_t SFX_Victory = {song_length(SFX_Victory_Notes), SFX_Victory_Notes};

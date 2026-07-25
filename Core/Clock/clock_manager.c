@@ -4,6 +4,7 @@
 
 static uint8_t dutyValue = 5;
 static uint8_t fadeValue = 5;
+static uint8_t volumeValue = 5;
 static time_t currentTime;
 static uint8_t led_enable;
 RTC_TimeTypeDef rtc_time;
@@ -15,7 +16,10 @@ RTC_TimeTypeDef rtc_time;
 #define BKP_DR_MENU_SOUND   RTC_BKP_DR3
 #define BKP_DR_FADE         RTC_BKP_DR4
 #define BKP_DR_INIT         RTC_BKP_DR7
+#define BKP_DR_VOLUME       RTC_BKP_DR8
+#define BKP_DR_VOLUME_INIT  RTC_BKP_DR9
 #define BKP_INIT_MAGIC      0x4C50U
+#define BKP_VOLUME_MAGIC    0x564FU
 
 // Яркость в RTC Backup Register (используем BKP_DR1)
 static void SaveDuty(void) {
@@ -46,6 +50,7 @@ void ClockManager_Init(void) {
          */
         dutyValue = 5;
         fadeValue = 5;
+        volumeValue = 5;
         led_enable = 1;
 
         ClockManager_ResetTime();
@@ -55,11 +60,21 @@ void ClockManager_Init(void) {
         HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_MENU_SOUND, 1);
         HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_POWERON_SONG, 0);
         HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_ALARM_SONG, 0);
+        HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_VOLUME, volumeValue);
+        HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_VOLUME_INIT, BKP_VOLUME_MAGIC);
         HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_INIT, BKP_INIT_MAGIC);
     } else {
         LoadDuty();
         LoadFade();
         led_enable = ClockManager_GetLEDState();
+
+        if (HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_VOLUME_INIT) != BKP_VOLUME_MAGIC) {
+            volumeValue = 5;
+            HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_VOLUME, volumeValue);
+            HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_VOLUME_INIT, BKP_VOLUME_MAGIC);
+        } else {
+            volumeValue = ClockManager_GetVolume();
+        }
     }
 
     Segment_SetBrightness(dutyValue * 10);
@@ -182,4 +197,16 @@ uint8_t ClockManager_GetMenuSound(void) {
     uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_MENU_SOUND);
     g_sound_enabled = (val == 0 || val == 1) ? (uint8_t)val : 1;
     return g_sound_enabled;
+}
+
+void ClockManager_SetVolume(uint8_t volume) {
+    if (volume > 10) volume = 10;
+    volumeValue = volume;
+    HAL_RTCEx_BKUPWrite(&hrtc, BKP_DR_VOLUME, volumeValue);
+}
+
+uint8_t ClockManager_GetVolume(void) {
+    uint32_t val = HAL_RTCEx_BKUPRead(&hrtc, BKP_DR_VOLUME);
+    volumeValue = (val <= 10) ? (uint8_t)val : 5;
+    return volumeValue;
 }

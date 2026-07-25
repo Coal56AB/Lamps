@@ -5,5 +5,6 @@
 extern MenuNode g_clockNode;
 extern MenuNode g_timerNode;
 extern MenuNode g_stopwatchNode;
+void Timer_Update(void);
 
 #endif

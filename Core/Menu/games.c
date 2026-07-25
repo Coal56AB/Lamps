@@ -57,7 +57,7 @@ static void Display_ZeroMillis(void) {
         if(!g_game1sec.celebrating)
         {
           g_game1sec.celebrating = 1;
-          Melody_Play(&melody, &Polyphia_PlayingGod, 134);
+          Melody_Play(&melody, &SFX_Victory, 240);
         }
       }
     }

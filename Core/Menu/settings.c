@@ -18,6 +18,8 @@ static uint8_t g_originalDuty;
 static uint8_t g_editDuty;
 static uint8_t g_originalFade;
 static uint8_t g_editFade;
+static uint8_t g_originalVolume;
+static uint8_t g_editVolume;
 
 /////// TIME EDIT ////////
 static void Display_TimeEdit(void) {
@@ -238,6 +240,61 @@ static void FadeEdit_OnButton(Button_Type btn, bool longPress) {
     }
 }
 
+/////// VOLUME EDIT ////////
+static void Display_VolumeEdit(void) {
+    char buf[7] = "SND   ";
+    if (g_editVolume == 10) {
+        buf[4] = '1';
+        buf[5] = '0';
+    } else {
+        buf[5] = '0' + g_editVolume;
+    }
+    Segment_SetString(buf);
+}
+
+static void OnEnter_VolumeEdit(void) {
+    g_originalVolume = ClockManager_GetVolume();
+    g_editVolume = g_originalVolume;
+    Melody_SetVolume(&melody, g_editVolume);
+}
+
+static void Preview_Volume(void) {
+    Melody_SetVolume(&melody, g_editVolume);
+    Melody_Play(&melody, &SFX_Beep, 240);
+}
+
+static void VolumeEdit_OnButton(Button_Type btn, bool longPress) {
+    (void)longPress;
+    switch (btn) {
+        case BUTTON_UP:
+            if (g_editVolume < 10) {
+                g_editVolume++;
+                Preview_Volume();
+                Menu_Refresh();
+            }
+            break;
+        case BUTTON_DOWN:
+            if (g_editVolume > 0) {
+                g_editVolume--;
+                Preview_Volume();
+                Menu_Refresh();
+            }
+            break;
+        case BUTTON_SELECT:
+            ClockManager_SetVolume(g_editVolume);
+            Melody_SetVolume(&melody, g_editVolume);
+            Menu_GoBack();
+            break;
+        case BUTTON_BACK:
+            ClockManager_SetVolume(g_originalVolume);
+            Melody_SetVolume(&melody, g_originalVolume);
+            Menu_GoBack();
+            break;
+        default:
+            break;
+    }
+}
+
 
 
 
@@ -252,6 +309,8 @@ static void Reset_OnButton(Button_Type btn, bool longPress) {
         ClockManager_ResetTime();
         ClockManager_SetDuty(5);
         ClockManager_SetFade(5);
+        ClockManager_SetVolume(5);
+        Melody_SetVolume(&melody, 5);
         Menu_GoBack();
     }
 }
@@ -286,16 +345,22 @@ static void LEDEdit_OnButton(Button_Type btn, bool longPress) {
 /////// POWER ON SONG ////////
 static void Display_PowerOnSong(void) {
     char buf[7];
-    sprintf(buf, "PnS%02d", ClockManager_GetPowerOnSong());
+    uint8_t song = ClockManager_GetPowerOnSong();
+    sprintf(buf, "P %-4.4s", Melody_GetSongName(song));
     Segment_SetString(buf);
 }
 static void PowerOnSong_OnButton(Button_Type btn, bool longPress) {
     (void)longPress;
     uint8_t current = ClockManager_GetPowerOnSong();
+    uint8_t songCount = Melody_GetSongCount();
+
+    if (current > songCount) {
+        current = 0;
+    }
     
     switch (btn) {
         case BUTTON_UP:
-            if (current < 10) {
+            if (current < songCount) {
                 current++;
                 ClockManager_SetPowerOnSong(current);
                 Menu_Refresh();
@@ -320,17 +385,24 @@ static void PowerOnSong_OnButton(Button_Type btn, bool longPress) {
 /////// ALARM SONG ////////
 static void Display_AlarmSong(void) {
     char buf[7];
-    sprintf(buf, "AL%02d", ClockManager_GetAlarmSong());
+    uint8_t song = ClockManager_GetAlarmSong();
+    const char *name = (song == 0) ? "BEEP" : Melody_GetSongName(song);
+    sprintf(buf, "T %-4.4s", name);
     Segment_SetString(buf);
 }
 
 static void AlarmSong_OnButton(Button_Type btn, bool longPress) {
     (void)longPress;
     uint8_t current = ClockManager_GetAlarmSong();
+    uint8_t songCount = Melody_GetSongCount();
+
+    if (current > songCount) {
+        current = 0;
+    }
     
     switch (btn) {
         case BUTTON_UP:
-            if (current < 10) {
+            if (current < songCount) {
                 current++;
                 ClockManager_SetAlarmSong(current);
                 Menu_Refresh();
@@ -418,6 +490,19 @@ MenuNode g_fadeEditNode = {
     .data = &g_editFade
 };
 
+MenuNode g_volumeEditNode = {
+    .name = "SOUND",
+    .parent = &g_settingsNode,
+    .children = NULL,
+    .childCount = 0,
+    .selectedChild = 0,
+    .display = Display_VolumeEdit,
+    .onEnter = OnEnter_VolumeEdit,
+    .onUpdate = NULL,
+    .onButton = VolumeEdit_OnButton,
+    .data = &g_editVolume
+};
+
 MenuNode g_LEDEditNode = {
     .name = "LED",
     .parent = &g_settingsNode,
@@ -445,7 +530,7 @@ MenuNode g_MenuSoundNode = {
 };
 
 MenuNode g_PowerOnSongNode = {
-    .name = "PonS",
+    .name = "P SONG",
     .parent = &g_settingsNode,
     .children = NULL,
     .childCount = 0,
@@ -458,7 +543,7 @@ MenuNode g_PowerOnSongNode = {
 };
 
 MenuNode g_AlarmSongNode = {
-    .name = "AL",
+    .name = "T SONG",
     .parent = &g_settingsNode,
     .children = NULL,
     .childCount = 0,
@@ -487,6 +572,7 @@ MenuNode* g_settingsChildren[] = {
     &g_timeEditNode,
     &g_dutyEditNode,
     &g_fadeEditNode,
+    &g_volumeEditNode,
     &g_LEDEditNode,
     &g_MenuSoundNode,
     &g_PowerOnSongNode,

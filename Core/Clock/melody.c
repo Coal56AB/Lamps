@@ -1,6 +1,22 @@
 #include "melody.h"
 
 MelodyHandle melody;
+
+#define SONG_BPM 134
+#define DEFAULT_VOLUME 5
+#define MAX_VOLUME 10
+#define VOLUME_COMPARE_STEP 5
+
+typedef struct {
+    const char *name;
+    Melody_t *melody;
+    uint16_t bpm;
+} SongEntry;
+
+static const SongEntry songCatalog[] = {
+    {"OD",  &Polyphia_OD,         SONG_BPM},
+    {"GOD", &Polyphia_PlayingGod, SONG_BPM}
+};
 #define FIXED_ARR 1000  // фиксированный период таймера
 #define FIXED_VOLUME 2  // фиксированный период таймера
 
@@ -33,7 +49,8 @@ static void _set_freq(MelodyHandle* mh, uint32_t freq) {
     // Фиксированный период
     __HAL_TIM_SET_AUTORELOAD(mh->htim, FIXED_ARR);
     // Скважность 50% для чистого тона
-    __HAL_TIM_SET_COMPARE(mh->htim, mh->channel, FIXED_VOLUME);
+    __HAL_TIM_SET_COMPARE(mh->htim, mh->channel,
+                          (uint32_t)mh->volume * VOLUME_COMPARE_STEP);
 }
 
 void Melody_Init(MelodyHandle* mh, TIM_HandleTypeDef* htim, uint32_t channel, uint32_t timer_clock_hz) {
@@ -44,6 +61,7 @@ void Melody_Init(MelodyHandle* mh, TIM_HandleTypeDef* htim, uint32_t channel, ui
     mh->current_index = 0;
     mh->note_start_time = 0;
     mh->is_playing = 0;
+    mh->volume = DEFAULT_VOLUME;
     
     // Настраиваем таймер на фиксированный период
     __HAL_TIM_SET_AUTORELOAD(mh->htim, FIXED_ARR);
@@ -104,4 +122,43 @@ void Melody_Update(MelodyHandle* mh) {
 
 uint8_t Melody_IsPlaying(MelodyHandle* mh) {
     return mh->is_playing;
+}
+
+void Melody_SetVolume(MelodyHandle* mh, uint8_t volume) {
+    if (volume > MAX_VOLUME) {
+        volume = MAX_VOLUME;
+    }
+    mh->volume = volume;
+
+    if (mh->is_playing && mh->melody != NULL &&
+        mh->melody->sequence[mh->current_index].freq != NOTE_REST) {
+        _set_freq(mh, mh->melody->sequence[mh->current_index].freq);
+    } else if (volume == 0) {
+        _set_freq(mh, 0);
+    }
+}
+
+uint8_t Melody_GetVolume(MelodyHandle* mh) {
+    return mh->volume;
+}
+
+uint8_t Melody_GetSongCount(void) {
+    return (uint8_t)(sizeof(songCatalog) / sizeof(songCatalog[0]));
+}
+
+const char* Melody_GetSongName(uint8_t song) {
+    if (song == 0 || song > Melody_GetSongCount()) {
+        return "OFF";
+    }
+    return songCatalog[song - 1].name;
+}
+
+uint8_t Melody_PlaySong(MelodyHandle* mh, uint8_t song) {
+    if (song == 0 || song > Melody_GetSongCount()) {
+        return 0;
+    }
+
+    Melody_Play(mh, songCatalog[song - 1].melody,
+                songCatalog[song - 1].bpm);
+    return 1;
 }

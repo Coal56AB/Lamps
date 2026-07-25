@@ -7,7 +7,7 @@
 
 MenuContext g_ctx;
 uint8_t g_sound_enabled = 1;
-
+ 
 extern bool ReadButton(Button_Type btn);
 extern MenuNode* Menu_GetRootMenu(void);
 
