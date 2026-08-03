@@ -174,8 +174,8 @@ static uint8_t BuildCurrentDigitMask(void) {
     }
   }
 
-  if (currentPos == 5)
-    mask = SWAP_BIT5_BIT6(mask);
+//  if (currentPos == 5)
+//    mask = SWAP_BIT5_BIT6(mask);
 
   return mask;
 }
