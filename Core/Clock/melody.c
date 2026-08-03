@@ -34,6 +34,8 @@ static void _set_pwm_freq(MelodyHandle* mh, uint8_t voice, uint32_t freq) {
     MelodyOutput *output = &mh->outputs[voice];
     uint32_t psc;
 
+    if (output->htim == NULL) return;
+
     if (freq == NOTE_REST || mh->volume == 0) {
         __HAL_TIM_SET_COMPARE(output->htim, output->channel, 0);
         return;
@@ -77,6 +79,7 @@ void Melody_Init(MelodyHandle* mh,
         mh->voices[voice].current_index = 0;
         mh->voices[voice].note_start_time = 0;
         mh->voices[voice].is_playing = 0;
+        if (mh->outputs[voice].htim == NULL) continue;
         __HAL_TIM_SET_AUTORELOAD(mh->outputs[voice].htim, FIXED_ARR);
         __HAL_TIM_SET_COMPARE(mh->outputs[voice].htim,
                               mh->outputs[voice].channel, 0);

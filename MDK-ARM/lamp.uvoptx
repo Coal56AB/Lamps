@@ -154,16 +154,16 @@
           <Type>0</Type>
           <LineNumber>210</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
+          <Address>134231942</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
+          <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Core\Menu\settings.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\lamp\../Core/Menu/settings.c\210</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -249,6 +249,10 @@
         <Entry>
           <Name>System Viewer\EXTI</Name>
           <WinId>35902</WinId>
+        </Entry>
+        <Entry>
+          <Name>System Viewer\GPIOA</Name>
+          <WinId>35900</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\GPIOB</Name>
