@@ -7,9 +7,12 @@ typedef struct {
     float duration;      // длительность в долях (0.25 = четверть)
 } Note_t;
 
+// Один шаг: [0] = PA8, [1] = PB0.
+typedef Note_t MelodyStep_t[2];
+
 typedef struct {
-    float length;       // длительность мелодии в количестве нот
-    const Note_t *sequence;   // последовательность нот
+    uint16_t length;            // количество шагов мелодии
+    const MelodyStep_t *sequence;
 } Melody_t;
 
 

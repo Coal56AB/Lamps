@@ -119,6 +119,7 @@ int main(void)
   MX_RTC_Init();
   MX_TIM2_Init();
   MX_TIM1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -128,12 +129,13 @@ int main(void)
   Segment_Init();
   ClockManager_Init();
   Menu_Init(&g_clockNode);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_Base_Start_IT(&htim2);
   MenuItems_Init();
-  Melody_Init(&melody, &htim1, TIM_CHANNEL_1, 72000000);
+  Melody_Init(&melody,
+              &htim1, TIM_CHANNEL_1, 72000000,
+              &htim3, TIM_CHANNEL_3, 72000000);
   Melody_SetVolume(&melody, ClockManager_GetVolume());
   Melody_PlaySong(&melody, ClockManager_GetPowerOnSong());
+  HAL_TIM_Base_Start_IT(&htim2);
   
 //  Melody_Play(&melody, mySong, 134);
   while (1)

@@ -80,6 +80,8 @@ void Error_Handler(void);
 #define SEGMENT_A_GPIO_Port GPIOB
 #define BUZZER_Pin GPIO_PIN_8
 #define BUZZER_GPIO_Port GPIOA
+#define BUZZER_B_Pin GPIO_PIN_0
+#define BUZZER_B_GPIO_Port GPIOB
 #define SW_ENTER_Pin GPIO_PIN_9
 #define SW_ENTER_GPIO_Port GPIOA
 #define SW_UP_Pin GPIO_PIN_10
