@@ -2,7 +2,6 @@
 
 MelodyHandle melody;
 
-#define SONG_BPM 134
 #define DEFAULT_VOLUME 5
 #define MAX_VOLUME 10
 #define VOLUME_COMPARE_STEP 5
@@ -15,8 +14,8 @@ typedef struct {
 } SongEntry;
 
 static const SongEntry songCatalog[] = {
-    {"OD",  &Polyphia_OD,         SONG_BPM},
-    {"GOD", &Polyphia_PlayingGod, SONG_BPM}
+    {"OD",  &Polyphia_OD,         136/2},
+    {"GOD", &Polyphia_PlayingGod, 134}
 };
 
 static uint32_t _duration_to_ms(MelodyHandle* mh, float duration) {
@@ -73,7 +72,7 @@ void Melody_Init(MelodyHandle* mh,
     mh->melody = NULL;
     mh->is_playing = 0;
     mh->volume = DEFAULT_VOLUME;
-    mh->bpm = SONG_BPM;
+    mh->bpm = 120;
 
     for (voice = 0; voice < 2U; voice++) {
         mh->voices[voice].current_index = 0;
@@ -98,7 +97,7 @@ void Melody_Play(MelodyHandle* mh, Melody_t *new_melody, uint16_t bpm) {
 
     Melody_Stop(mh);
     mh->melody = new_melody;
-    mh->bpm = bpm > 0U ? bpm : SONG_BPM;
+    mh->bpm = bpm > 0U ? bpm : 120;
 
     if (new_melody == NULL || new_melody->length == 0U) return;
 

@@ -119,9 +119,7 @@ int main(void)
   MX_RTC_Init();
   MX_TIM2_Init();
   MX_TIM1_Init();
-#ifndef SWD_DEBUG_MODE
   MX_TIM3_Init();
-#endif
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -134,11 +132,7 @@ int main(void)
   MenuItems_Init();
   Melody_Init(&melody,
               &htim1, TIM_CHANNEL_1, 72000000,
-#ifdef SWD_DEBUG_MODE
-              NULL, 0, 0);
-#else
               &htim3, TIM_CHANNEL_3, 72000000);
-#endif
   Melody_SetVolume(&melody, ClockManager_GetVolume());
   Melody_PlaySong(&melody, ClockManager_GetPowerOnSong());
   HAL_TIM_Base_Start_IT(&htim2);

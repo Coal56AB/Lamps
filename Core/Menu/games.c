@@ -35,6 +35,24 @@ static Game1SecData g_game1sec;
 static GameReactionData g_gameReaction;
 static GameClickerData g_gameClicker;
 
+static void Game_DisableFade(void) {
+    Segment_SetFade(0);
+}
+
+static void Game_RestoreFade(void) {
+    Segment_SetFade(ClockManager_GetFade());
+}
+
+static void Game_OpenRootMenu(void) {
+    Game_RestoreFade();
+    Menu_OpenMenu(&g_rootMenu);
+}
+
+static void Game_GoBack(void) {
+    Game_RestoreFade();
+    Menu_GoBack();
+}
+
 
 /////// ZERO MILLIS ////////
 static void Display_ZeroMillis(void) {
@@ -65,17 +83,19 @@ static void Display_ZeroMillis(void) {
 }
 
 static void OnEnter_ZeroMillis(void) {
+    Game_DisableFade();
     g_game1sec.state = 0;
     Menu_Refresh();
 }
 
 static void ZeroMillis_OnButton(Button_Type btn, bool longPress) {
     if (longPress && btn == BUTTON_SELECT) {
-        Menu_OpenMenu(&g_rootMenu);
+        Game_OpenRootMenu();
         return;
     }
     if (btn == BUTTON_BACK) {
-        Menu_GoBack();
+        Game_GoBack();
+        return;
     } 
     
     uint32_t tick = HAL_GetTick();
@@ -133,6 +153,7 @@ static void Display_Reaction(void) {
 
 
 static void OnEnter_Reaction(void) {
+    Game_DisableFade();
     g_gameReaction.state = 0;
     g_ctx.debounceTime = 0;
     Menu_Refresh();
@@ -140,13 +161,14 @@ static void OnEnter_Reaction(void) {
 
 static void Reaction_OnButton(Button_Type btn, bool longPress) {
     if (longPress && btn == BUTTON_SELECT) {
-        Menu_OpenMenu(&g_rootMenu);
+        Game_OpenRootMenu();
         return;
     }
     
     if (btn == BUTTON_BACK) {
-        Menu_GoBack();
         g_ctx.debounceTime = 30;
+        Game_GoBack();
+        return;
     }
     
     uint32_t tick = HAL_GetTick();
@@ -195,6 +217,7 @@ static void Display_Clicker(void) {
 }
 
 static void OnEnter_Clicker(void) {
+    Game_DisableFade();
     g_gameClicker.active = false;
     g_gameClicker.finished = false;
     g_gameClicker.clicks = 0;
@@ -211,12 +234,13 @@ static void OnUpdate_Clicker(void) {
 
 static void Clicker_OnButton(Button_Type btn, bool longPress) {
     if (longPress && btn == BUTTON_SELECT) {
-        Menu_OpenMenu(&g_rootMenu);
+        Game_OpenRootMenu();
         return;
     }
     
     if (btn == BUTTON_BACK) {
-        Menu_GoBack();
+        Game_GoBack();
+        return;
     }
     
     if (!g_gameClicker.active && !g_gameClicker.finished && btn == BUTTON_SELECT) {

@@ -105,10 +105,6 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
-/* Keep SWD on PA13/PA14 and disable buzzer B on PB0.
- * PB0 is physically bridged to PA13 on this board. */
-#define SWD_DEBUG_MODE
-
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
