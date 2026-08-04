@@ -31,11 +31,18 @@ static const Note_t* _current_note(MelodyHandle* mh, uint8_t voice) {
 
 static void _set_pwm_freq(MelodyHandle* mh, uint8_t voice, uint32_t freq) {
     MelodyOutput *output = &mh->outputs[voice];
+    uint8_t track_volume = MAX_VOLUME;
+    uint32_t compare;
     uint32_t psc;
 
     if (output->htim == NULL) return;
 
-    if (freq == NOTE_REST || mh->volume == 0) {
+    if (mh->melody != NULL) {
+        track_volume = mh->melody->track_volume[voice];
+        if (track_volume > MAX_VOLUME) track_volume = MAX_VOLUME;
+    }
+
+    if (freq == NOTE_REST || mh->volume == 0 || track_volume == 0) {
         __HAL_TIM_SET_COMPARE(output->htim, output->channel, 0);
         return;
     }
@@ -48,8 +55,9 @@ static void _set_pwm_freq(MelodyHandle* mh, uint8_t voice, uint32_t freq) {
     __HAL_TIM_SET_AUTORELOAD(output->htim, FIXED_ARR);
     __HAL_TIM_SET_COUNTER(output->htim, 0);
     output->htim->Instance->EGR = TIM_EGR_UG;
-    __HAL_TIM_SET_COMPARE(output->htim, output->channel,
-                          (uint32_t)mh->volume * VOLUME_COMPARE_STEP);
+    compare = ((uint32_t)mh->volume * track_volume * VOLUME_COMPARE_STEP +
+               MAX_VOLUME / 2U) / MAX_VOLUME;
+    __HAL_TIM_SET_COMPARE(output->htim, output->channel, compare);
 }
 
 static void _set_voice_freq(MelodyHandle* mh, uint8_t voice, uint16_t freq) {

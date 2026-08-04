@@ -13,6 +13,7 @@ typedef Note_t MelodyStep_t[2];
 typedef struct {
     uint16_t length;            // количество шагов мелодии
     const MelodyStep_t *sequence;
+    uint8_t track_volume[2];    // громкость дорожек [0..10]
 } Melody_t;
 
 
@@ -23,6 +24,8 @@ typedef struct {
 #define NOTE_EIGHTH     0.125
 #define NOTE_SIXTEENTH  0.0625
 #define NOTE_THIRTYSECOND 0.03125
+#define NOTE_QUARTER_TRIPLET (1.0f / 6.0f)
+#define NOTE_EIGHTH_TRIPLET  (1.0f / 12.0f)
 
 #define NOTE_WHOLE_DOT      1.5
 #define NOTE_HALF_DOT       0.75
@@ -33,8 +36,22 @@ typedef struct {
 // Ноты (частота, Гц) - диапазон 700-8000 Гц для SCS-17-S
 // Октавы смещены: старая 4-я = новая 0-я, старая 5-я = новая 1-я и т.д.
 
-// 0-я октава (бывшая 4-я)
+// 00-я октава (бывшая 3-я)
+#define NOTE_B00  (494/2)
+#define NOTE_C0  (523/2)
+#define NOTE_CS0 (554/2)
+#define NOTE_D0  (587/2)
+#define NOTE_DS0 (622/2)
+#define NOTE_E0  (659/2)
+#define NOTE_F0  (698/2)
+#define NOTE_FS0 (740/2)
+#define NOTE_G0  (784/2)
+#define NOTE_GS0 (831/2)
+#define NOTE_A0  (880/2)
+#define NOTE_AS0 (932/2)
 #define NOTE_B0  494
+
+// 0-я октава (бывшая 4-я)
 #define NOTE_C1  523
 #define NOTE_CS1 554
 #define NOTE_D1  587
@@ -92,7 +109,17 @@ typedef struct {
 
 // Сольфеджио с новыми октавами
 // 0-я октава
-#define SI0  NOTE_B0   // 494 Hz
+#define SI00  NOTE_B00   // 523 Hz
+
+
+// 0-я октава
+#define DO0  NOTE_C0   // 523 Hz
+#define RE0  NOTE_D0   // 587 Hz
+#define MI0  NOTE_E0   // 659 Hz
+#define FA0  NOTE_F0   // 698 Hz
+#define SOL0 NOTE_G0   // 784 Hz
+#define LA0  NOTE_A0   // 880 Hz
+#define SI0  NOTE_B0   // 988 Hz
 
 // 1-я октава
 #define DO1  NOTE_C1   // 523 Hz
