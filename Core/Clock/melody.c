@@ -4,8 +4,8 @@ MelodyHandle melody;
 
 #define DEFAULT_VOLUME 5
 #define MAX_VOLUME 10
-#define VOLUME_COMPARE_STEP 5
-#define FIXED_ARR 1000
+#define VOLUME_COMPARE_STEP 10U
+#define FIXED_ARR 1000U
 
 typedef struct {
     const char *name;
@@ -14,7 +14,7 @@ typedef struct {
 } SongEntry;
 
 static const SongEntry songCatalog[] = {
-    {"OD",  &Polyphia_OD,         136/2},
+    {"OD",  &Polyphia_OD,         136},
     {"GOD", &Polyphia_PlayingGod, 134}
 };
 
@@ -29,11 +29,12 @@ static const Note_t* _current_note(MelodyHandle* mh, uint8_t voice) {
     return &mh->melody->sequence[mh->voices[voice].current_index][voice];
 }
 
-static void _set_pwm_freq(MelodyHandle* mh, uint8_t voice, uint32_t freq) {
+static void _set_pwm_freq(MelodyHandle* mh, uint8_t voice, float freq) {
     MelodyOutput *output = &mh->outputs[voice];
     uint8_t track_volume = MAX_VOLUME;
     uint32_t compare;
-    uint32_t psc;
+    uint32_t psc_div;
+    float psc_value;
 
     if (output->htim == NULL) return;
 
@@ -42,25 +43,27 @@ static void _set_pwm_freq(MelodyHandle* mh, uint8_t voice, uint32_t freq) {
         if (track_volume > MAX_VOLUME) track_volume = MAX_VOLUME;
     }
 
-    if (freq == NOTE_REST || mh->volume == 0 || track_volume == 0) {
+    if (freq <= NOTE_REST || mh->volume == 0 || track_volume == 0) {
         __HAL_TIM_SET_COMPARE(output->htim, output->channel, 0);
         return;
     }
 
-    psc = output->timer_clock_hz / freq / (FIXED_ARR + 1U);
-    if (psc < 1U) psc = 1U;
-    if (psc > 65535U) psc = 65535U;
+    psc_value = (float)output->timer_clock_hz /
+                (freq * (float)(FIXED_ARR + 1U));
+    if (psc_value < 1.0f) psc_value = 1.0f;
+    if (psc_value > 65536.0f) psc_value = 65536.0f;
+    psc_div = (uint32_t)(psc_value + 0.5f);
 
-    __HAL_TIM_SET_PRESCALER(output->htim, psc - 1U);
+    __HAL_TIM_SET_PRESCALER(output->htim, psc_div - 1U);
     __HAL_TIM_SET_AUTORELOAD(output->htim, FIXED_ARR);
     __HAL_TIM_SET_COUNTER(output->htim, 0);
     output->htim->Instance->EGR = TIM_EGR_UG;
-    compare = ((uint32_t)mh->volume * track_volume * VOLUME_COMPARE_STEP +
-               MAX_VOLUME / 2U) / MAX_VOLUME;
+    compare = ((uint32_t)mh->volume * track_volume *
+               VOLUME_COMPARE_STEP + MAX_VOLUME / 2U) / MAX_VOLUME;
     __HAL_TIM_SET_COMPARE(output->htim, output->channel, compare);
 }
 
-static void _set_voice_freq(MelodyHandle* mh, uint8_t voice, uint16_t freq) {
+static void _set_voice_freq(MelodyHandle* mh, uint8_t voice, float freq) {
     _set_pwm_freq(mh, voice, freq);
 }
 
