@@ -778,6 +778,16 @@
               <FilePath>..\Core\Clock\clock_manager.h</FilePath>
             </File>
             <File>
+              <FileName>rtc_monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Clock\rtc_monitor.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc_monitor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Clock\rtc_monitor.h</FilePath>
+            </File>
+            <File>
               <FileName>segment.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Clock\segment.c</FilePath>
