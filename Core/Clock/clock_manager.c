@@ -1,6 +1,7 @@
 #include "clock_manager.h"
 #include "segment.h"
 #include "rtc.h"
+#include "rtc_monitor.h"
 
 static uint8_t dutyValue = 5;
 static uint8_t fadeValue = 5;
@@ -109,7 +110,9 @@ void ClockManager_SetTime(uint8_t hour, uint8_t min, uint8_t sec) {
 //    rtc_time.TimeFormat = RTC_HOURFORMAT_24;
 //    rtc_time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
 //    rtc_time.StoreOperation = RTC_STOREOPERATION_RESET;
-    HAL_RTC_SetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN);
+    if (HAL_RTC_SetTime(&hrtc, &rtc_time, RTC_FORMAT_BIN) == HAL_OK) {
+        RTC_Monitor_NotifyTimeChanged();
+    }
 }
 
 uint8_t ClockManager_GetDuty(void) {

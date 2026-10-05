@@ -30,6 +30,7 @@
 #include "melody.h"
 #include "songs.h"
 #include "clock.h"
+#include "rtc_monitor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,6 +129,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   Segment_Init();
   ClockManager_Init();
+  RTC_Monitor_Init();
   Menu_Init(&g_clockNode);
   MenuItems_Init();
   Melody_Init(&melody,
@@ -144,6 +146,7 @@ int main(void)
     Timer_Update();
     Melody_Update(&melody);
     ClockManager_GetTime(1);
+    RTC_Monitor_Process();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
