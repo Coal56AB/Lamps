@@ -1,3 +1,4 @@
-/MDK-ARM/lamp/
-/MDK-ARM/DebugConfig/
+/STM32/MDK-ARM/lamp/
+/STM32/MDK-ARM/DebugConfig/
+*.uvguix*
 /docs/videos/
